@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         115一键删除'@'、'-'、转大写
-// @name:zh      115一键删除'@'、'-'、转大写
+// @name         115一键删除'@'、'-'、']'、'最后一个-后面'、转大写
+// @name:zh      115一键删除'@'、'-'、'}'、'最后一个-后面'、转大写
 // @description  2022.11.14
 // @author       Zccc
 // @namespace    115ReName@Zccc
-// @version      0.0.2
+// @version      0.0.3
 // @match        https://115.com/*
 // @exclude      https://115.com/s/*
 
@@ -64,7 +64,7 @@
     })
   }
 
-  // 删除@之前的
+  // 删除 @ 之前的
   function removeEmail(toopTip, pItem) {
     var $btn = $('<a ><i></i><div style="background:white"><span>删除@</span></div></a>');
 
@@ -73,10 +73,28 @@
     addDomClick($btn, toopTip, pItem, reName)
   }
 
+  // 删除 ] 之前的 部分名称前缀会以[]开头
+  function removeBracketsR(toopTip, pItem) {
+    var $btn = $('<a ><i></i><div style="background:white"><span>删除]</span></div></a>');
+    const reName = (pItem.name.slice(pItem.name.indexOf(']') + 1));
+
+    addDomClick($btn, toopTip, pItem, reName)
+  }
+
+
   // 删除 - 之前的
   function removeBar(toopTip, pItem) {
     var $btn = $('<a ><i></i><div style="background:white"><span>删除-</span></div></a>');
     const reName = (pItem.name.slice(pItem.name.indexOf('-') + 1));
+
+    addDomClick($btn, toopTip, pItem, reName)
+  }
+
+  // 删除 最后一个 - 之后的内容
+  function removeLastBar(toopTip, pItem) {
+    console.log(pItem, 'pItempItem')
+    var $btn = $('<a ><i></i><div style="background:white"><span>删除尾-</span></div></a>');
+    const reName = (pItem.name.slice(0, pItem.name.lastIndexOf('-')));
 
     addDomClick($btn, toopTip, pItem, reName)
   }
@@ -89,38 +107,50 @@
     addDomClick($btn, toopTip, pItem, reName)
   }
 
+  // 新增一个DOM避免与位置错乱
+  function addDom(toopTip, LiItem) {
+    var $dom = $('<div style="width:100%; height:22px;"></div>');
+    removeEmail($dom, LiItem)
+    removeBar($dom, LiItem)
+    nameToUpper($dom, LiItem)
+    removeBracketsR($dom, LiItem)
+    removeLastBar($dom, LiItem)
+    $dom.prependTo(toopTip);
+  }
+
   // 重命名初始化
   function reNameInit() {
     setInterval(() => {
-      const box = document.getElementById('js_cantain_box').getElementsByTagName('li');
+      const box = document.getElementById('js_cantain_box') ? document.getElementById('js_cantain_box').getElementsByTagName('li') : '';
 
-      for (let i = 0; i < box.length; i++) {
-        const itemTarget = box[i].getElementsByClassName('file-opr')[0];
+      if (box) {
+        for (let i = 0; i < box.length; i++) {
+          const itemTarget = box[i].getElementsByClassName('file-opr')[0];
 
-        const liNode = box[i]
+          const liNode = box[i]
 
-        var LiItem = {
-          id: "",
-          name: "",
-          parentID: "",
-        };
+          var LiItem = {
+            id: "",
+            name: "",
+            parentID: "",
+          };
 
-        var type = liNode.getAttribute("file_type");
-        LiItem.name = liNode.getAttribute('title');
-        LiItem.parentID = liNode.getAttribute('p_id');
+          var type = liNode.getAttribute("file_type");
+          LiItem.name = liNode.getAttribute('title');
+          LiItem.parentID = liNode.getAttribute('p_id');
 
-        if (type == "0") {
-          LiItem.id = liNode.getAttribute('cate_id');
-        } else {
-          LiItem.id = liNode.getAttribute('file_id');
-        }
+          if (type == "0") {
+            LiItem.id = liNode.getAttribute('cate_id');
+          } else {
+            LiItem.id = liNode.getAttribute('file_id');
+          }
 
-        const rName = itemTarget.getElementsByClassName('rename')
+          const rName = itemTarget.getElementsByClassName('rename')
 
-        if (!rName.length) {
-          removeEmail(itemTarget, LiItem)
-          removeBar(itemTarget, LiItem)
-          nameToUpper(itemTarget, LiItem)
+          if (!rName.length) {
+
+            addDom(itemTarget, LiItem)
+          }
         }
       }
     }, 1000)
