@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         115一键删除'@'、'-'、']'、'最后一个-后面'、转大写
 // @name:zh      115一键删除'@'、'-'、'}'、'最后一个-后面'、转大写
-// @description  2022.11.14
+// @description  2022.11.26
 // @author       Zccc
 // @namespace    115ReName@Zccc
-// @version      0.0.4
+// @version      0.0.5
 // @match        https://115.com/*
 // @exclude      https://115.com/s/*
 
@@ -184,7 +184,7 @@
 
   // 一键改名，自动复制前缀
   function oneKeyReName(toolTip, pItem) {
-    var $btn = $('<a ><div style="background:white" class="rename"><span>一键改名</span></div></a>');
+    var $btn = $('<a><div style="background:white;" class="rename"><span>一键改名</span></div></a>');
     let reName = getVideoCode(pItem.name)
     let regExp = new RegExp(reName + "[_-]C");
     let match = pItem.name.toUpperCase().match(regExp);
@@ -213,7 +213,9 @@
     removeLastBar($dom, LiItem)
     copyFrontPlacket($dom, LiItem)
     oneKeyReName($dom, LiItem)
-    $dom.prependTo(toolTip);
+    // 占位使用为了换行 style="opacity: 0;"
+    $('<a style="float: none; height: 0; line-height: 0; opacity: 0;" >1</a>').appendTo(toolTip);
+    $dom.appendTo(toolTip);
   }
 
   // 重命名初始化
